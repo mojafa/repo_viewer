@@ -5,6 +5,18 @@ import 'package:oauth2/oauth2.dart';
 
 import '../domain/auth_failure.dart';
 import 'credentials_storage/credentials_storage.dart';
+
+// ignore: depend_on_referenced_packages
+import 'package:http/http.dart' as http; 
+
+class GithubOAuthHttpClient extends http.BaseClient{
+  final httpClient = http.Client();
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    request.headers['Accept'] = 'application/json';
+    return httpClient.send(request);
+  }
+}
 class GithubAuthenticator {
   final CredentialsStorage _credentialsStorage;
   GithubAuthenticator(this._credentialsStorage);
@@ -42,9 +54,10 @@ AuthorizationCodeGrant createGrant(){
     authorizationEndpoint, 
     tokenEndpoint, 
     secret: clientSecret,
+    httpClient: GithubOAuthHttpClient(),
   );
 }
-
+  
 
 Uri getAuthorizationUrl(AuthorizationCodeGrant grant){
   return grant.getAuthorizationUrl(redirectUrl, scopes: scopes); 
@@ -59,7 +72,11 @@ Future<Either<AuthFailure, Unit>> handleAuthorizationResponse(
     await _credentialsStorage.save(httpClient.credentials);
     return right(unit);
     } on FormatException {
-      return Left(AuthFailure.server())
+      return left(const AuthFailure.server());
+    } on AuthorizationException catch (e){
+      return left(AuthFailure.server('${e.error}: ${e.description}'));
+    } on PlatformException{
+      return left(const AuthFailure.storage());
     }
   }
 
