@@ -10,6 +10,7 @@ environment:
   sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
+  dartz: ^0.10.1
   flutter:
     sdk: flutter
   flutter_secure_storage: ^8.0.0
