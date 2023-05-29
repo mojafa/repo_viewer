@@ -80,4 +80,6 @@ Future<Either<AuthFailure, Unit>> handleAuthorizationResponse(
     }
   }
 
+  Future<Either<AuthFailure, Unit>> signOut
+
 }
