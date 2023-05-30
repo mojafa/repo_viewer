@@ -1,8 +1,13 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:oauth2/oauth2.dart';
 
+import '../../core/shared/encoders.dart';
 import '../domain/auth_failure.dart';
 import 'credentials_storage/credentials_storage.dart';
 
@@ -19,7 +24,8 @@ class GithubOAuthHttpClient extends http.BaseClient{
 }
 class GithubAuthenticator {
   final CredentialsStorage _credentialsStorage;
-  GithubAuthenticator(this._credentialsStorage);
+  final Dio _dio; 
+  GithubAuthenticator(this._credentialsStorage, this._dio);
 
   static const clientId = '54f032abd2d30be84f7f';
   static const clientSecret = '3ea174a0c668cd4b66609f06f37cc44d10db7352';
@@ -27,6 +33,7 @@ class GithubAuthenticator {
 
   static final authorizationEndpoint = Uri.parse('https://github.com/login/oauth/authorize');
   static final tokenEndpoint = Uri.parse('https://github.com/login/oauth/access_token');
+ static final revocationEndpoint = Uri.parse('https://api.github.com/applications/$clientId/token');
   static final redirectUrl = Uri.parse('http://localhost:3000/callback');
 
 
@@ -80,6 +87,41 @@ Future<Either<AuthFailure, Unit>> handleAuthorizationResponse(
     }
   }
 
-  Future<Either<AuthFailure, Unit>> signOut
+  Future<Either<AuthFailure, Unit>> signOut() async {
+    final accessToken = await _credentialsStorage.read().then((credentials) =>  credentials?.accessToken);
+    utf8.encode('$clientId:$clientSecret');
+
+     final usernameAndPassword = stringToBase64.encode('$clientId:$clientSecret');
+
+    try {
+      try {
+      _dio.deleteUri(
+        revocationEndpoint,
+        data: {
+          'access_token': accessToken, 
+          'client_id': clientId,
+          'client_secret': clientSecret,
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Basic ${base64Encode(utf8.encode('$clientId:$clientSecret'))}',
+            'Accept': 'application/vnd.github.v3+json',
+          },
+        ), 
+      ); 
+      } on DioError catch (e) {
+        if (e.isNoConnectionError) {
+          // ignore: avoid_print
+          // print('Token not revoked');
+        } else {
+          rethrow;
+        } 
+      }
+      await _credentialsStorage.clear();
+      return right(unit);
+    } on PlatformException {
+      return left(const AuthFailure.storage());
+    }
+  } 
 
 }
