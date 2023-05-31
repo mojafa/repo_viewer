@@ -21,6 +21,7 @@ dependencies:
   freezed_annotation: ^2.2.0
   oauth2: ^2.0.1
   webview_flutter: ^4.2.1
+  riverpod: ^2.3.6
 
 dev_dependencies:
   auto_route_generator: ^7.1.1

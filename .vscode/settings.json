@@ -4,12 +4,12 @@
         "**/.svn": true,
         "**/.hg": true,
         "**/CVS": true,
+        "**/.DS_Store": true,
         "**/Thumbs.db": true,
         "**/.gitignore": true,
         "**/.gitmodules": true,
-        "**/.vscode": true,
+        "**/.vscode": false,
         "**/.idea": true,
-        "**/.DS_Store": true,
         "**/.env": true,
         "**/.env.*": true,
         "**/.env.local": true,
@@ -33,9 +33,7 @@
         "**/.history": true,
         "**/.gitkeep": true,
         "**/.vscodeignore": true,
-        "**/.dart_tool": true,
-
-
+        "**/.dart_tool": true
     },
     "explorerExclude.backup": {}
 }
