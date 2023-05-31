@@ -8,7 +8,7 @@
         "**/Thumbs.db": true,
         "**/.gitignore": true,
         "**/.gitmodules": true,
-        "**/.vscode": false,
+        "**/.vscode": true,
         "**/.idea": true,
         "**/.env": true,
         "**/.env.*": true,
