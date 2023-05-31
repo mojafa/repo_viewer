@@ -139,11 +139,11 @@ Future<Either<AuthFailure, Credentials>> refresh(
     await _credentialsStorage.save(refreshedCredentials);
     return right(refreshedCredentials);
   } on FormatException {
-      return left(const AuthFailure.server());
+      return left( AuthFailure.server());
     } on AuthorizationException catch (e){
       return left(AuthFailure.server('${e.error}: ${e.description}'));
     } on PlatformException{
-      return left(const AuthFailure.storage());
+      return left( AuthFailure.storage());
     }
 
 
